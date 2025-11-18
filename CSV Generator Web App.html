@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Import CSV Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #0078d4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #106ebe;
+        }
+        .info {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0078d4;
+        }
+        .warning {
+            background-color: #fff4e5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff8c00;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .preview {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Microsoft Entra Group Import CSV Generator</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong> Enter email addresses or user principal names (one per line) in the text area below, then click "Download CSV" to generate your import file.
+        </div>
+
+        <div class="warning">
+            <strong>Important:</strong> You need at least 2 email addresses to successfully upload the file to Microsoft Entra.
+        </div>
+
+        <label for="emails">Member Object ID or User Principal Name:</label>
+        <textarea id="emails" placeholder="Enter email addresses or user principal names, one per line...">123@gmail.com
+234@gmail.com
+12122@gmail.com</textarea>
+
+        <button onclick="downloadCSV()">Download CSV</button>
+        <button onclick="clearEmails()" style="background-color: #6c757d;">Clear</button>
+        <button onclick="showPreview()" style="background-color: #28a745;">Preview CSV</button>
+
+        <div id="preview" class="preview" style="display: none;"></div>
+    </div>
+
+    <script>
+        function generateCSVContent() {
+            const emails = document.getElementById('emails').value
+                .split('\n')
+                .map(e => e.trim())
+                .filter(e => e.length > 0);
+
+            if (emails.length === 0) {
+                alert('Please enter at least one email address.');
+                return null;
+            }
+
+            if (emails.length < 2) {
+                alert('Warning: Microsoft Entra requires at least 2 members for successful upload.');
+            }
+
+            let csvContent = 'version:v1.0\r\n';
+            csvContent += 'Member object ID or user principal name [memberObjectIdOrUpn] Required\r\n';
+            
+            emails.forEach(email => {
+                csvContent += `${email}\r\n`;
+            });
+
+            return csvContent;
+        }
+
+        function downloadCSV() {
+            const csvContent = generateCSVContent();
+            if (!csvContent) return;
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            // Create folder path with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const folderName = `GroupImport_${timestamp}`;
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${folderName}/GroupImportMembers.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function clearEmails() {
+            document.getElementById('emails').value = '';
+            document.getElementById('preview').style.display = 'none';
+        }
+
+        function showPreview() {
+            const csvContent = generateCSVContent();
+            if (!csvContent) return;
+
+            const preview = document.getElementById('preview');
+            preview.textContent = csvContent;
+            preview.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
