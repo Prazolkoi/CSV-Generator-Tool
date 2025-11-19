@@ -75,6 +75,11 @@
             white-space: pre-wrap;
             font-size: 12px;
         }
+        .readme-link {
+            margin-top: 20px;
+            display: block;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -97,6 +102,13 @@
         <button onclick="downloadCSV()">Download CSV</button>
         <button onclick="clearEmails()" style="background-color: #6c757d;">Clear</button>
         <button onclick="showPreview()" style="background-color: #28a745;">Preview CSV</button>
+
+        <!-- Read Me / Instructions Link -->
+        <p class="readme-link">
+            <a href="readme.html" target="_blank" style="color:#0078d4; text-decoration:underline;">
+                View Instructions / Read Me
+            </a>
+        </p>
 
         <div id="preview" class="preview" style="display: none;"></div>
     </div>
@@ -135,7 +147,6 @@
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
             
-            // Create folder path with timestamp
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
             const folderName = `GroupImport_${timestamp}`;
             
